@@ -101,8 +101,11 @@ async function runPolling() {
                         if (room.sensorDataPoints && room.sensorDataPoints.humidity) {
                             fields.humidity = room.sensorDataPoints.humidity.percentage;
                         }
+                        if (room.sensorDataPoints && room.sensorDataPoints.insideTemperature) {
+                            fields.temperature = room.sensorDataPoints.insideTemperature.value;
+                        }
                         if (room.setting && room.setting.temperature) {
-                            fields.temperature = room.setting.temperature.value;
+                            fields.setTemperature = room.setting.temperature.value;
                         }
 
                         if (Object.keys(fields).length > 0) {
