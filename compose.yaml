@@ -1,0 +1,36 @@
+services:
+  tado-data-capture:
+    build: .
+    ports:
+      - "${TADO_LOGIN_PORT:-3000}:${TADO_LOGIN_PORT:-3000}"
+    volumes:
+      - tado_data:/usr/src/app/data
+
+    environment:
+      - TADO_DRY_RUN=${TADO_DRY_RUN:-false}
+      - TADO_CLIENT_ID=${TADO_CLIENT_ID}
+      - INFLUX_URL=${INFLUX_URL}
+      - INFLUX_TOKEN=${INFLUX_TOKEN}
+      - INFLUX_ORG=${INFLUX_ORG}
+      - INFLUX_BUCKET=${INFLUX_BUCKET}
+      - TADO_POLL_INTERVAL_WEATHER=${TADO_POLL_INTERVAL_WEATHER}
+      - TADO_POLL_INTERVAL_ROOMS=${TADO_POLL_INTERVAL_ROOMS}
+      - TADO_POLL_INTERVAL_HEATPUMP=${TADO_POLL_INTERVAL_HEATPUMP}
+      - TADO_LOGIN_PORT=${TADO_LOGIN_PORT}
+    restart: always
+
+volumes:
+  tado_data:
+
+    # Optional InfluxDB service for self-contained testing
+    #  influxdb:
+    #    image: influxdb:2
+    #    ports:
+    #      - "8086:8086"
+    #    environment:
+    #      - DOCKER_INFLUXDB_INIT_MODE=setup
+    #      - DOCKER_INFLUXDB_INIT_USERNAME=my-user
+    #      - DOCKER_INFLUXDB_INIT_PASSWORD=my-password
+    #      - DOCKER_INFLUXDB_INIT_ORG=my-org
+    #      - DOCKER_INFLUXDB_INIT_BUCKET=tado
+    #      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=my-token
