@@ -11,6 +11,13 @@ A Node.js application to capture data from your Tado heating system and store it
 - **Enhanced Dashboard**: Real-time connected status, polling intervals, and next poll countdowns.
 - **Dry Run Mode**: Test without writing to InfluxDB.
 
+## Screenshots
+
+| Login View | Dashboard View |
+|:---:|:---:|
+| ![Login View](docs/screenshots/login.png) | ![Dashboard View](docs/screenshots/dashboard.png) |
+
+
 ## Getting Started
 
 ### Prerequisites

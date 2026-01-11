@@ -5,3 +5,4 @@ yarn-error.log
 .env
 token.json
 examples.md
+data/token.json
