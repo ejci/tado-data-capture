@@ -63,6 +63,6 @@ See `.env.example` for all available options.
 | Variable | Description |
 |----------|-------------|
 | `TADO_DRY_RUN` | Set to `true` to disable InfluxDB writes. |
-| `TADO_POLL_INTERVAL_...` | Polling intervals in milliseconds (`WEATHER`, `ROOMS`, `HEATPUMP`). |
+| `TADO_POLL_INTERVAL_...` | Polling intervals in milliseconds (`WEATHER`, `ROOMS`, `HEATPUMP`, `DEVICES`). |
 | `INFLUX_...` | InfluxDB connection details. |
 | `TADO_LOGIN_PORT` | Port for the web interface. |

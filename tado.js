@@ -140,6 +140,11 @@ async function getHeatPump(homeId) {
     return response.data;
 }
 
+async function getRoomsAndDevices(homeId) {
+    const response = await authenticatedRequest('GET', `${TADO_HOPS_URL}/homes/${homeId}/roomsAndDevices?ngsw-bypass=true`);
+    return response.data;
+}
+
 module.exports = {
     checkToken,
     startAuth,
@@ -147,5 +152,6 @@ module.exports = {
     getMe,
     getWeather,
     getRooms,
-    getHeatPump
+    getHeatPump,
+    getRoomsAndDevices
 };

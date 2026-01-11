@@ -23,7 +23,8 @@ module.exports = {
     intervals: {
       weather: parseInt(process.env.TADO_POLL_INTERVAL_WEATHER) || 3600000, // 1 hour
       rooms: parseInt(process.env.TADO_POLL_INTERVAL_ROOMS) || 600000,     // 10 mins
-      heatPump: parseInt(process.env.TADO_POLL_INTERVAL_HEATPUMP) || 600000 // 10 mins
+      heatPump: parseInt(process.env.TADO_POLL_INTERVAL_HEATPUMP) || 600000, // 10 mins
+      devices: parseInt(process.env.TADO_POLL_INTERVAL_DEVICES) || 600000   // 10 mins
     }
   },
   influx: {

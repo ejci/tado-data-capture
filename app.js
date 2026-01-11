@@ -80,6 +80,7 @@ async function runPolling() {
                     });
                 } catch (e) {
                     console.error("Error polling weather:", e.message);
+                    await influx.writeMeasurement('errors', { type: 'polling' }, { message: e.message });
                 }
             }
 
@@ -114,6 +115,7 @@ async function runPolling() {
                     }
                 } catch (e) {
                     console.error("Error polling rooms:", e.message);
+                    await influx.writeMeasurement('errors', { type: 'polling' }, { message: e.message });
                 }
             }
 
@@ -153,6 +155,45 @@ async function runPolling() {
                     }
                 } catch (e) {
                     console.error("Error polling heat pump:", e.message);
+                    await influx.writeMeasurement('errors', { type: 'polling' }, { message: e.message });
+                }
+            }
+
+            // 4. Devices
+            if (shouldPoll('devices')) {
+                try {
+                    console.log(new Date().toISOString(), `Polling devices for home ${homeId}...`);
+                    trackCall();
+                    const devicesData = await tado.getRoomsAndDevices(homeId);
+                    if (config.dryRun) {
+                        console.log('--- [Dry Run] Devices API Result ---');
+                        console.dir(devicesData, { depth: null, colors: true });
+                    }
+
+                    if (devicesData.rooms) {
+                        for (const room of devicesData.rooms) {
+                            if (room.devices) {
+                                for (const device of room.devices) {
+                                    if (device.temperatureAsMeasured !== undefined && device.temperatureAsMeasured !== null) {
+                                        const fields = {
+                                            temperatureAsMeasured: device.temperatureAsMeasured,
+                                            temperatureOffset: device.temperatureOffset || 0
+                                        };
+                                        const tags = {
+                                            homeId,
+                                            roomName: room.roomName,
+                                            serialNumber: device.serialNumber,
+                                            deviceType: device.type
+                                        };
+                                        await influx.writeMeasurement('devices', tags, fields);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.error("Error polling devices:", e.message);
+                    await influx.writeMeasurement('errors', { type: 'polling' }, { message: e.message });
                 }
             }
 

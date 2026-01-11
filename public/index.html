@@ -74,7 +74,7 @@
 
         .stats {
             margin-top: 2rem;
-            text-align: left;
+            text-align: center;
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 1rem;
@@ -95,9 +95,9 @@
             opacity: 0.9;
         }
 
-        .grid-3 {
+        .grid-2 {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: 1rem;
             margin-top: 1rem;
         }
@@ -190,7 +190,7 @@
             </div>
         </div>
 
-        <div class="grid-3">
+        <div class="grid-2">
             <div class="poll-card">
                 <h3>Weather</h3>
                 <div>Interval: <span id="weather-interval">-</span>m</div>
@@ -205,6 +205,11 @@
                 <h3>Heat Pump</h3>
                 <div>Interval: <span id="heatpump-interval">-</span>m</div>
                 <div class="countdown" id="heatpump-next">-</div>
+            </div>
+            <div class="poll-card">
+                <h3>Devices</h3>
+                <div>Interval: <span id="devices-interval">-</span>m</div>
+                <div class="countdown" id="devices-next">-</div>
             </div>
         </div>
     </div>
@@ -254,7 +259,8 @@
                 const map = {
                     'weather': 'weather',
                     'rooms': 'rooms',
-                    'heatPump': 'heatpump'
+                    'heatPump': 'heatpump',
+                    'devices': 'devices'
                 };
 
                 for (const [key, idSuffix] of Object.entries(map)) {
