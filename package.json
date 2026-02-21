@@ -1,6 +1,6 @@
 {
   "name": "tado-data-capture",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Capture Tado heating system data and store in InfluxDB",
   "main": "app.js",
   "scripts": {
