@@ -3,6 +3,7 @@ const path = require('path');
 const config = require('./config');
 const tado = require('./tado');
 const influx = require('./influx');
+const logger = require('./logger');
 
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
@@ -50,7 +51,7 @@ app.get('/api/login/poll', async (req, res) => {
 async function runPolling() {
     const authenticated = await tado.checkToken();
     if (!authenticated) {
-        console.log("Not authenticated. Waiting for login...");
+        logger.warn('Not authenticated. Waiting for login...');
         return;
     }
 
@@ -61,17 +62,16 @@ async function runPolling() {
 
         for (const home of me.homes) {
             const homeId = home.id;
-            console.log(`Polling home ${homeId}...`);
+            logger.info({ homeId }, 'Polling home');
 
             // 1. Weather
             if (shouldPoll('weather')) {
                 try {
-                    console.log(new Date().toISOString(), `Polling weather for home ${homeId}...`);
+                    logger.info({ homeId }, 'Polling weather');
                     trackCall();
                     const weather = await tado.getWeather(homeId);
                     if (config.dryRun) {
-                        console.log('--- [Dry Run] Weather API Result ---');
-                        console.dir(weather, { depth: null, colors: true });
+                        logger.debug({ homeId, data: weather }, 'Dry run: weather API result');
                     }
                     await influx.writeMeasurement('weather', { homeId }, {
                         solarIntensityPercentage: (weather.solarIntensity && weather.solarIntensity.percentage) || 0,
@@ -79,7 +79,7 @@ async function runPolling() {
                         weatherState: weather.weatherState.value
                     });
                 } catch (e) {
-                    console.error("Error polling weather:", e.message);
+                    logger.error({ homeId, err: e.message, context: 'weather' }, 'Error polling weather');
                     await influx.writeMeasurement('errors', { type: 'polling' }, { message: e.message });
                 }
             }
@@ -87,12 +87,11 @@ async function runPolling() {
             // 2. Rooms
             if (shouldPoll('rooms')) {
                 try {
-                    console.log(new Date().toISOString(), `Polling rooms for home ${homeId}...`);
+                    logger.info({ homeId }, 'Polling rooms');
                     trackCall();
                     const rooms = await tado.getRooms(homeId);
                     if (config.dryRun) {
-                        console.log('--- [Dry Run] Rooms API Result ---');
-                        console.dir(rooms, { depth: null, colors: true });
+                        logger.debug({ homeId, data: rooms }, 'Dry run: rooms API result');
                     }
 
                     for (const room of rooms) {
@@ -114,7 +113,7 @@ async function runPolling() {
                         }
                     }
                 } catch (e) {
-                    console.error("Error polling rooms:", e.message);
+                    logger.error({ homeId, err: e.message, context: 'rooms' }, 'Error polling rooms');
                     await influx.writeMeasurement('errors', { type: 'polling' }, { message: e.message });
                 }
             }
@@ -122,12 +121,11 @@ async function runPolling() {
             // 3. Heat Pump
             if (shouldPoll('heatPump')) {
                 try {
-                    console.log(new Date().toISOString(), `Polling heat pump for home ${homeId}...`);
+                    logger.info({ homeId }, 'Polling heat pump');
                     trackCall();
                     const heatPump = await tado.getHeatPump(homeId);
                     if (config.dryRun) {
-                        console.log('--- [Dry Run] Heat Pump API Result ---');
-                        console.dir(heatPump, { depth: null, colors: true });
+                        logger.debug({ homeId, data: heatPump }, 'Dry run: heat pump API result');
                     }
 
                     const fields = {};
@@ -154,7 +152,7 @@ async function runPolling() {
                         await influx.writeMeasurement('heat_pump', { homeId }, fields);
                     }
                 } catch (e) {
-                    console.error("Error polling heat pump:", e.message);
+                    logger.error({ homeId, err: e.message, context: 'heatPump' }, 'Error polling heat pump');
                     await influx.writeMeasurement('errors', { type: 'polling' }, { message: e.message });
                 }
             }
@@ -162,12 +160,11 @@ async function runPolling() {
             // 4. Devices
             if (shouldPoll('devices')) {
                 try {
-                    console.log(new Date().toISOString(), `Polling devices for home ${homeId}...`);
+                    logger.info({ homeId }, 'Polling devices');
                     trackCall();
                     const devicesData = await tado.getRoomsAndDevices(homeId);
                     if (config.dryRun) {
-                        console.log('--- [Dry Run] Devices API Result ---');
-                        console.dir(devicesData, { depth: null, colors: true });
+                        logger.debug({ homeId, data: devicesData }, 'Dry run: devices API result');
                     }
 
                     if (devicesData.rooms) {
@@ -192,7 +189,7 @@ async function runPolling() {
                         }
                     }
                 } catch (e) {
-                    console.error("Error polling devices:", e.message);
+                    logger.error({ homeId, err: e.message, context: 'devices' }, 'Error polling devices');
                     await influx.writeMeasurement('errors', { type: 'polling' }, { message: e.message });
                 }
             }
@@ -201,10 +198,10 @@ async function runPolling() {
         }
 
         lastUpdate = new Date().toISOString();
-        console.log(`Polling completed at ${lastUpdate}`);
+        logger.info({ lastUpdate }, 'Polling completed');
 
     } catch (e) {
-        console.error("Error during polling:", e.message);
+        logger.error({ err: e.message }, 'Error during polling');
         await influx.writeMeasurement('errors', { type: 'polling' }, { message: e.message });
     }
 }
@@ -241,8 +238,8 @@ setTimeout(runPolling, 5000);
 
 
 app.listen(config.port, () => {
-    console.log(`Server running on port ${config.port}`);
+    logger.info({ port: config.port }, 'Server running');
     if (config.dryRun) {
-        console.log("!!! DRY RUN MODE ENABLED - No data will be written to InfluxDB !!!");
+        logger.warn('DRY RUN MODE ENABLED — no data will be written to InfluxDB');
     }
 });

@@ -1,5 +1,6 @@
 const { InfluxDB, Point } = require('@influxdata/influxdb-client');
 const config = require('./config');
+const logger = require('./logger');
 
 let writeApi;
 let queryApi;
@@ -9,7 +10,7 @@ try {
     writeApi = influxDB.getWriteApi(config.influx.org, config.influx.bucket);
     queryApi = influxDB.getQueryApi(config.influx.org);
 } catch (error) {
-    console.error('Error initializing InfluxDB client:', error);
+    logger.error({ err: error.message }, 'Error initializing InfluxDB client');
 }
 
 /**
@@ -21,12 +22,12 @@ try {
  */
 async function writeMeasurement(measurement, tags, fields, timestamp) {
     if (config.dryRun) {
-        console.log(`[DRY RUN] Would write to InfluxDB: ${measurement}`, { tags, fields, timestamp });
+        logger.debug({ measurement, tags, fields, timestamp }, 'Dry run: would write to InfluxDB');
         return;
     }
 
     if (!writeApi) {
-        console.error('InfluxDB Write API not initialized. Cannot write data.');
+        logger.error('InfluxDB Write API not initialized. Cannot write data.');
         return;
     }
 
@@ -49,9 +50,8 @@ async function writeMeasurement(measurement, tags, fields, timestamp) {
 
         writeApi.writePoint(point);
         await writeApi.flush();
-        // console.log(`Written ${measurement} to InfluxDB`);
     } catch (error) {
-        console.error(`Error writing to InfluxDB (${measurement}):`, error);
+        logger.error({ measurement, err: error.message }, 'Error writing to InfluxDB');
     }
 }
 

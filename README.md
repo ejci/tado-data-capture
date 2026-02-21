@@ -70,6 +70,45 @@ See `.env.example` for all available options.
 | Variable | Description |
 |----------|-------------|
 | `TADO_DRY_RUN` | Set to `true` to disable InfluxDB writes. |
+| `TADO_LOG_LEVEL` | Log level: `trace`, `debug`, `info`, `warn`, `error`, `fatal` (default: `info`). |
 | `TADO_POLL_INTERVAL_...` | Polling intervals in milliseconds (`WEATHER`, `ROOMS`, `HEATPUMP`, `DEVICES`). |
 | `INFLUX_...` | InfluxDB connection details. |
 | `TADO_LOGIN_PORT` | Port for the web interface. |
+
+## Development
+
+```bash
+npm install        # install dependencies
+cp .env.example .env  # configure env
+npm run dev        # start with pino-pretty (human-readable output)
+```
+
+## Logging & Loki
+
+All logs are emitted as newline-delimited JSON to stdout:
+
+```json
+{"level":30,"time":"2026-02-21T15:00:00.000Z","service":"tado-data-capture","port":3000,"msg":"Server running"}
+{"level":50,"time":"2026-02-21T15:00:01.000Z","service":"tado-data-capture","context":"weather","err":"...","msg":"Error polling weather"}
+```
+
+Each line carries `"service": "tado-data-capture"`, making it straightforward to create Loki label filters in Promtail/Alloy:
+
+```
+{service="tado-data-capture"}
+```
+
+For human-readable output during development, pipe through `pino-pretty`:
+
+```bash
+node app.js | npx pino-pretty
+```
+
+## Project Structure
+
+- `app.js` — Main entry point and orchestration.
+- `config.js` — Configuration management and validation.
+- `logger.js` — Shared Pino logger instance.
+- `tado.js` — Tado OAuth2 authentication and data polling.
+- `influx.js` — InfluxDB connection handling and data writing.
+

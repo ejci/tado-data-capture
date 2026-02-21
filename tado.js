@@ -2,6 +2,7 @@ const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
 const config = require('./config');
+const logger = require('./logger');
 
 const TOKEN_FILE = path.join(__dirname, 'data', 'token.json');
 const TADO_AUTH_URL = 'https://login.tado.com/oauth2';
@@ -15,7 +16,7 @@ if (fs.existsSync(TOKEN_FILE)) {
     try {
         tokenData = JSON.parse(fs.readFileSync(TOKEN_FILE, 'utf8'));
     } catch (e) {
-        console.error('Error loading token.json:', e);
+        logger.error({ err: e.message }, 'Error loading token.json');
     }
 }
 
@@ -43,7 +44,7 @@ async function startAuth() {
         const response = await axios.post(`${TADO_AUTH_URL}/device_authorize`, params);
         return response.data;
     } catch (error) {
-        console.error('Error starting auth:', error.response ? error.response.data : error.message);
+        logger.error({ err: error.response ? error.response.data : error.message }, 'Error starting auth');
         throw error;
     }
 }
@@ -87,7 +88,7 @@ async function refreshToken() {
         saveToken(response.data);
         return response.data.access_token;
     } catch (error) {
-        console.error("Error refreshing token:", error.message);
+        logger.error({ err: error.message }, 'Error refreshing token');
         throw error;
     }
 }
@@ -103,7 +104,7 @@ async function authenticatedRequest(method, url) {
         });
     } catch (error) {
         if (error.response && error.response.status === 401) {
-            console.log("Token expired, refreshing...");
+            logger.info('Token expired, refreshing...');
             await refreshToken();
             return await axios({
                 method,
