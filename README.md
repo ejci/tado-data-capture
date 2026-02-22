@@ -5,11 +5,13 @@ A Node.js application to capture data from your Tado heating system and store it
 ## Features
 
 - **Tado OAuth2 Authentication**: Safe login via Tado website using Device Flow.
-- **Configurable Polling**: Set intervals for Weather, Rooms, and Heat Pump.
+- **Configurable Polling**: Independent intervals for Weather, Rooms, Heat Pump, and Devices.
 - **InfluxDB Integration**: Stores all metrics in InfluxDB for visualization (e.g., Grafana).
+- **Real InfluxDB health check**: The `/health` endpoint and dashboard ping InfluxDB's `/health` endpoint to report an accurate connection status.
 - **Dockerized**: Easy deployment with Docker Compose.
 - **Enhanced Dashboard**: Real-time connected status, polling intervals, and next poll countdowns.
 - **Dry Run Mode**: Test without writing to InfluxDB.
+- **Graceful shutdown**: Handles SIGTERM/SIGINT so in-flight requests complete before the process exits.
 
 ## Screenshots
 
@@ -106,9 +108,11 @@ node app.js | npx pino-pretty
 
 ## Project Structure
 
-- `app.js` — Main entry point and orchestration.
-- `config.js` — Configuration management and validation.
-- `logger.js` — Shared Pino logger instance.
-- `tado.js` — Tado OAuth2 authentication and data polling.
-- `influx.js` — InfluxDB connection handling and data writing.
+| File | Purpose |
+|---|---|
+| `app.js` | Entry point — Express server, polling scheduler, health route. |
+| `config.js` | Reads and validates all environment variables; exported as a frozen config object. |
+| `logger.js` | Shared [Pino](https://getpino.io/) logger (structured JSON, Loki-ready). |
+| `tado.js` | Tado OAuth2 Device Flow auth and all Tado API calls. |
+| `influx.js` | InfluxDB write client and `/health` connectivity check. |
 
