@@ -11,6 +11,7 @@ A Node.js application to capture data from your Tado heating system and store it
 - **Dockerized**: Easy deployment with Docker Compose.
 - **Enhanced Dashboard**: Real-time connected status, polling intervals, and next poll countdowns.
 - **Dry Run Mode**: Test without writing to InfluxDB.
+- **Automated Testing**: Comprehensive unit testing with Jest for logic, tokens, and mocked external services.
 - **Graceful shutdown**: Handles SIGTERM/SIGINT so in-flight requests complete before the process exits.
 
 ## Screenshots
@@ -83,6 +84,7 @@ See `.env.example` for all available options.
 npm install        # install dependencies
 cp .env.example .env  # configure env
 npm run dev        # start with pino-pretty (human-readable output)
+npm test           # run the Jest unit testing suite
 ```
 
 ## Logging & Loki
@@ -108,11 +110,12 @@ node app.js | npx pino-pretty
 
 ## Project Structure
 
-| File | Purpose |
+| File/Directory | Purpose |
 |---|---|
 | `app.js` | Entry point — Express server, polling scheduler, health route. |
 | `config.js` | Reads and validates all environment variables; exported as a frozen config object. |
 | `logger.js` | Shared [Pino](https://getpino.io/) logger (structured JSON, Loki-ready). |
 | `tado.js` | Tado OAuth2 Device Flow auth and all Tado API calls. |
 | `influx.js` | InfluxDB write client and `/health` connectivity check. |
+| `tests/` | Jest unit tests covering authentication flows, module initialization, and logic. |
 
